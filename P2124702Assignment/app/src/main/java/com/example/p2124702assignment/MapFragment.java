@@ -1,8 +1,13 @@
 package com.example.p2124702assignment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 
 import android.content.res.Resources;
@@ -40,6 +45,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -69,6 +75,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
+    private Marker mSelectedMarker;
 
     protected LatLng start=null;
     protected LatLng end=null;
@@ -121,7 +128,10 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         mGoogleMap=googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
+        //Add hawker centres marker
         mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3134, 103.7646)).title("Clementi Hawker Centre"));
+        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3347, 103.7215)).title("Taman Jurong Hawker Centre"));
+
 
         //Initialize Google Play Services
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -182,11 +192,11 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         if(isFirstTime){
             //Place current location marker
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("Current Position");
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
+//            MarkerOptions markerOptions = new MarkerOptions();
+//            markerOptions.position(latLng);
+//            markerOptions.title("Current Position");
+//            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+//            mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
 
             //move map camera
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,14));
@@ -195,19 +205,37 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         }
 
         //get destination location when user click on map
-        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
-            public void onMapClick(LatLng latLng) {
-
-                end=latLng;
-
-                mGoogleMap.clear();
+            public boolean onMarkerClick(@NonNull Marker marker) {
+                end=marker.getPosition();
 
                 start=new LatLng(location.getLatitude(),location.getLongitude());
                 //start route finding
                 Findroutes(start,end);
+
+                Location a = new Location("point A");
+                a.setLatitude(location.getLatitude());
+                a.setLongitude(location.getLongitude());
+                Location b = new Location("point B");
+                b.setLongitude(end.longitude);
+                b.setLatitude(end.latitude);
+
+                float distance = a.distanceTo(b);
+                Toast.makeText(getContext(),String.valueOf(distance)+"m",Toast.LENGTH_SHORT).show();
+
+                return false;
             }
         });
+//        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+//            @Override
+//            public void onMapClick(LatLng latLng) {
+//                if(null != mSelectedMarker) {
+//                    mSelectedMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
+//                }
+//                mSelectedMarker = null;
+//            }
+//        });
 
     }
 
@@ -312,16 +340,17 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     @Override
     public void onRoutingStart() {
-        Toast.makeText(getContext(),"Finding Route...",Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
         CameraUpdate center = CameraUpdateFactory.newLatLng(start);
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
+
         if(polylines!=null) {
             polylines.clear();
         }
+
         PolylineOptions polyOptions = new PolylineOptions();
         LatLng polylineStartLatLng=null;
         LatLng polylineEndLatLng=null;
@@ -334,7 +363,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
             if(i==shortestRouteIndex)
             {
                 polyOptions.color(getResources().getColor(R.color.instagram_iconblue));
-                polyOptions.width(7);
+                polyOptions.width(17);
                 polyOptions.addAll(route.get(shortestRouteIndex).getPoints());
                 Polyline polyline = mGoogleMap.addPolyline(polyOptions);
                 polylineStartLatLng=polyline.getPoints().get(0);
@@ -349,17 +378,17 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
         }
 
-        //Add Marker on route starting position
-        MarkerOptions startMarker = new MarkerOptions();
-        startMarker.position(polylineStartLatLng);
-        startMarker.title("My Location");
-        mGoogleMap.addMarker(startMarker);
-
-        //Add Marker on route ending position
-        MarkerOptions endMarker = new MarkerOptions();
-        endMarker.position(polylineEndLatLng);
-        endMarker.title("Destination");
-        mGoogleMap.addMarker(endMarker);
+//        //Add Marker on route starting position
+//        MarkerOptions startMarker = new MarkerOptions();
+//        startMarker.position(polylineStartLatLng);
+//        startMarker.title("My Location");
+//        mGoogleMap.addMarker(startMarker);
+//
+//        //Add Marker on route ending position
+//        MarkerOptions endMarker = new MarkerOptions();
+//        endMarker.position(polylineEndLatLng);
+//        endMarker.title("Destination");
+//        mGoogleMap.addMarker(endMarker);
     }
 
     @Override
