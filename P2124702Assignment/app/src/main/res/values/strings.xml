@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">P2124702 Assignment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- to toggle the open close button of the navigation drawer -->
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAK-5mdNE48AQi26VAtIsShu6TTi24srCg</string>
+</resources>

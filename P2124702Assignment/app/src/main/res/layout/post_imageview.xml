@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/post"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/postTitle"
+                        android:layout_width="350dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/instagramsans_bold"
+                        android:gravity="center_vertical"
+                        android:text="Drinking boba"
+                        android:textSize="24sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@android:color/darker_gray" />
+
+                    <TextView
+                        android:id="@+id/postLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_baseline_location_on_24"
+                        android:drawableTint="#7E7E7E"
+                        android:fontFamily="@font/instagramsans_regular"
+                        android:gravity="center_vertical"
+                        android:text="Genting Highlands"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:minWidth="48dp"
+                    app:srcCompat="@drawable/ic_baseline_more_horiz_24"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/postImageView"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                app:srcCompat="@drawable/img" />
+
+            <TextView
+                android:id="@+id/postCaption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/instagramsans_regular"
+                android:text="I love drinking boba"
+                android:textSize="18sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</FrameLayout>
