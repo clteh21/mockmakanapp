@@ -129,8 +129,12 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         //Add hawker centres marker
-        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3134, 103.7646)).title("Clementi Hawker Centre"));
-        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3347, 103.7215)).title("Taman Jurong Hawker Centre"));
+        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3134, 103.7646))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker))
+                        .title("Clementi Hawker Centre"));
+        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3347, 103.7215))
+                .title("Taman Jurong Hawker Centre")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker)));
 
 
         //Initialize Google Play Services
@@ -208,12 +212,32 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+
+                //hides title of marker
+                marker.hideInfoWindow();
+
+                //centers the marker on the map
+                int zoom = (int)mGoogleMap.getCameraPosition().zoom;
+                CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(new
+                        LatLng(marker.getPosition().latitude + (double)90/Math.pow(2, zoom),
+                        marker.getPosition().longitude), zoom);
+                mGoogleMap.animateCamera(cu,500,null);
+
+                //checks if marker is selected anot
+                if (null != mSelectedMarker) {
+                    mSelectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker));
+                }
+                mSelectedMarker = marker;
+                mSelectedMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
+
+
                 end=marker.getPosition();
-
                 start=new LatLng(location.getLatitude(),location.getLongitude());
-                //start route finding
-                Findroutes(start,end);
 
+//                //start route finding
+//                Findroutes(start,end);
+
+                //calculates and finds distance between 2 points
                 Location a = new Location("point A");
                 a.setLatitude(location.getLatitude());
                 a.setLongitude(location.getLongitude());
@@ -222,26 +246,38 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
                 b.setLatitude(end.latitude);
 
                 float distance = a.distanceTo(b);
-                Toast.makeText(getContext(),String.valueOf(distance)+"m",Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(),String.valueOf(distance)+"m",Toast.LENGTH_SHORT).show();
 
-                return false;
+                //Start bottom sheet dialog
+                BottomScrollMap bottomScrollMap = new BottomScrollMap(marker.getTitle(),distance,start,end);
+                bottomScrollMap.show(getChildFragmentManager(),bottomScrollMap.getTag());
+
+                return true;
             }
         });
-//        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-//            @Override
-//            public void onMapClick(LatLng latLng) {
-//                if(null != mSelectedMarker) {
-//                    mSelectedMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
-//                }
-//                mSelectedMarker = null;
-//            }
-//        });
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(null != mSelectedMarker) {
+                    mSelectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker));
+                }
+                mSelectedMarker = null;
+            }
+        });
+
+        mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                marker.hideInfoWindow();
+            }
+        });
 
     }
 
     // function to find Routes.
     public void Findroutes(LatLng Start, LatLng End)
     {
+
         if(Start==null || End==null) {
             Toast.makeText(getContext(),"Unable to get location",Toast.LENGTH_LONG).show();
         }
@@ -347,16 +383,20 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         CameraUpdate center = CameraUpdateFactory.newLatLng(start);
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
 
-        if(polylines!=null) {
+        //clears other routes before add new route
+        if (polylines != null) {
+            for(Polyline line : polylines){
+                line.remove();
+            }
             polylines.clear();
         }
+
+        polylines = new ArrayList<>();
 
         PolylineOptions polyOptions = new PolylineOptions();
         LatLng polylineStartLatLng=null;
         LatLng polylineEndLatLng=null;
 
-
-        polylines = new ArrayList<>();
         //add route(s) to the map using polyline
         for (int i = 0; i <route.size(); i++) {
 
