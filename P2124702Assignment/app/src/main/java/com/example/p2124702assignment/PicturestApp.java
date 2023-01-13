@@ -13,14 +13,23 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 
-public class PicturestApp extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class PicturestApp extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        BottomScrollMap.OnRouteRequestListener {
 
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
+
+    public void onRouteRequest(LatLng origin, LatLng destination) {
+        MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.FragmentContainer);
+        if(mapFragment!=null){
+            mapFragment.Findroutes(origin, destination);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

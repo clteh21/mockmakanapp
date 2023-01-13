@@ -1,6 +1,7 @@
 package com.example.p2124702assignment;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,24 @@ public class BottomScrollMap extends BottomSheetDialogFragment {
     String hawkerTitle;
     float distance;
     LatLng start, end;
+    Context ct;
+
+    private OnRouteRequestListener listener;
+
+    public interface OnRouteRequestListener {
+        void onRouteRequest(LatLng origin, LatLng destination);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof OnRouteRequestListener) {
+            listener = (OnRouteRequestListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnRouteRequestListener");
+        }
+    }
 
     //constructor
     public BottomScrollMap(String title, float distance, LatLng start, LatLng end) {
@@ -52,6 +71,20 @@ public class BottomScrollMap extends BottomSheetDialogFragment {
         //inflate the custom layout for bottom sheet fragment
         rootView = inflater.inflate(R.layout.fragment_bottom_scroll_map, container, false);
 
+        Button findRouteButton = rootView.findViewById(R.id.find_route);
+        findRouteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                //call the function in other fragment
+//                MapFragment mapFragment = (MapFragment) getS().findFragmentById(R.id.FragmentContainer);
+////                mapFragment.start = start;
+////                mapFragment.end = end;
+//                mapFragment.Findroutes(start,end);
+                listener.onRouteRequest(start, end);
+                dialog.dismiss();
+            }
+        });
+
         return rootView;
     }
 
@@ -64,36 +97,32 @@ public class BottomScrollMap extends BottomSheetDialogFragment {
         distanceText = view.findViewById(R.id.textViewDistance);
         distanceText.setText(String.valueOf(distance/1000)+"km away from you bitch");
         hawkerPicture = view.findViewById(R.id.hawkerImageView);
-        String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/stall-margaretdrive.jpg";
+        String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/hawker/hawker-margaretdrive.jpg ";
         Picasso.get().load(imageUrl).into(hawkerPicture);
 
-        Button findRouteButton = view.findViewById(R.id.find_route);
-        findRouteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //call the function in other fragment
-                MapFragment mapFragment = new MapFragment();
-                mapFragment.start = start;
-                mapFragment.end = end;
-                mapFragment.Findroutes(start,end);
-            }
-        });
+
 
         //sheet behaviour
         bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
 //        bottomSheetBehavior.setPeekHeight((int) (getResources().getDisplayMetrics().heightPixels * 0.25));
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//        bottomSheetBehavior.setDraggable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        bottomSheetBehavior.setDraggable(true);
 //        bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-
+                if (newState== BottomSheetBehavior.STATE_EXPANDED){
+                    HomeFragment homeFragment = new HomeFragment();
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.FragmentContainer, homeFragment)
+                            .addToBackStack(null)
+                            .commit();
+                    dialog.dismiss();
+                }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
             }
         });
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -112,5 +141,11 @@ public class BottomScrollMap extends BottomSheetDialogFragment {
 //
 //            }
 //        });
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 }

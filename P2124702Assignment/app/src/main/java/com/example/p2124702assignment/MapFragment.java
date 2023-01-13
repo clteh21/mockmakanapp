@@ -30,6 +30,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -88,7 +90,6 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
     @Override
     public void onResume() {
         super.onResume();
-
         setUpMapIfNeeded();
     }
 
@@ -212,6 +213,12 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+                if (polylines != null) {
+                    for(Polyline line : polylines){
+                        line.remove();
+                    }
+                    polylines.clear();
+                }
 
                 //hides title of marker
                 marker.hideInfoWindow();
@@ -219,7 +226,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
                 //centers the marker on the map
                 int zoom = (int)mGoogleMap.getCameraPosition().zoom;
                 CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(new
-                        LatLng(marker.getPosition().latitude + (double)90/Math.pow(2, zoom),
+                        LatLng(marker.getPosition().latitude + (double)90/Math.pow(10, zoom),
                         marker.getPosition().longitude), zoom);
                 mGoogleMap.animateCamera(cu,500,null);
 
@@ -250,7 +257,7 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
                 //Start bottom sheet dialog
                 BottomScrollMap bottomScrollMap = new BottomScrollMap(marker.getTitle(),distance,start,end);
-                bottomScrollMap.show(getChildFragmentManager(),bottomScrollMap.getTag());
+                bottomScrollMap.show(getParentFragmentManager(),bottomScrollMap.getTag());
 
                 return true;
             }
@@ -262,6 +269,12 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
                     mSelectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker));
                 }
                 mSelectedMarker = null;
+                if (polylines != null) {
+                    for(Polyline line : polylines){
+                        line.remove();
+                    }
+                    polylines.clear();
+                }
             }
         });
 
@@ -380,8 +393,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     @Override
     public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
-        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
+//        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
+//        CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
 
         //clears other routes before add new route
         if (polylines != null) {
@@ -417,6 +430,13 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
             }
 
         }
+
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(start)
+                .include(end)
+                .build();
+
+        mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,350));
 
 //        //Add Marker on route starting position
 //        MarkerOptions startMarker = new MarkerOptions();
