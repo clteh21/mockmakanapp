@@ -17,10 +17,11 @@ public class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
     public RecyclerViewHolder(@NonNull View itemView) {
         super(itemView);
-        postTitle = itemView.findViewById(R.id.postTitle);
-        postImage = itemView.findViewById(R.id.postImageView);
-        postLocation = itemView.findViewById(R.id.postLocation);
-        postCaption = itemView.findViewById(R.id.postCaption);
+            postTitle = itemView.findViewById(R.id.postTitle);
+            postImage = itemView.findViewById(R.id.postImageView);
+            postLocation = itemView.findViewById(R.id.postLocation);
+            postCaption = itemView.findViewById(R.id.postCaption);
+
     }
 
     public FrameLayout getView(){

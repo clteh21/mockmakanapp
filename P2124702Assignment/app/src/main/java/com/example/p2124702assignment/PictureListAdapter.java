@@ -36,6 +36,7 @@ public class PictureListAdapter extends RecyclerView.Adapter<RecyclerViewHolder>
     private ArrayList<Double> lat, lon;
     private ArrayList<byte[]> images;
     private ArrayList<Integer> id;
+
     View viewer;
 
     public PictureListAdapter(Context ct, ArrayList<String> Title, ArrayList<String> Captions, ArrayList<String> Location, ArrayList<byte[]> images, ArrayList<Integer> id, ArrayList<Double> lat, ArrayList<Double> lon){

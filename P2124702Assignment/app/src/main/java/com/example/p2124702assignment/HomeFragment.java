@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -31,7 +32,6 @@ public class HomeFragment extends Fragment {
 
     //Add RecyclerView member
     private RecyclerView recyclerView;
-    private Cursor model = null;
     private PictureHelper helper = null;
     private PictureListAdapter adapter = null;
     private String postID = null;
@@ -41,10 +41,11 @@ public class HomeFragment extends Fragment {
     private ArrayList<byte[]> images;
     private ArrayList<Integer> id;
 
-    private TextView title;
-    private TextView captions;
-    private TextView location;
-    private ImageView postImage;
+    private RecyclerView hawkerRecycler;
+    private HawkerAdapter hawkerAdapter = null;
+    private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
+    private ArrayList<Integer> hawkerId, hawkerStallAmount;
+    private JDBCHelper jdbcHelper = null;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -122,7 +123,21 @@ public class HomeFragment extends Fragment {
         lon = new ArrayList<>();
         adapter = new PictureListAdapter(getContext(),Title,Captions,Location,images, id, lat, lon);
         recyclerView.setAdapter(adapter);
+
+        hawkerRecycler = view.findViewById(R.id.recyclerHawker);
+        jdbcHelper = new JDBCHelper();
+        hawkerId = new ArrayList<>();
+        hawkerImage = new ArrayList<>();
+        hawkerLocation = new ArrayList<>();
+        hawkerName = new ArrayList<>();
+        hawkerStallAmount = new ArrayList<>();
+        hawkerStatus = new ArrayList<>();
+        hawkerAdapter = new HawkerAdapter(getContext(), hawkerId, hawkerName, hawkerStallAmount, hawkerLocation, hawkerStatus, hawkerImage);
+        hawkerRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        hawkerRecycler.setAdapter(hawkerAdapter);
+
         displaydata();
+        displayHawker();
 
         return view;
     }
@@ -130,8 +145,6 @@ public class HomeFragment extends Fragment {
     private void displaydata() {
         Cursor cursor = helper.getAll();
         if(cursor.getCount()==0){
-            Toast.makeText(getContext(),"No entry exists", Toast.LENGTH_SHORT).show();
-            return;
         }
         else
         {
@@ -147,31 +160,44 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void displayHawker() {
+        hawkerId = jdbcHelper.getID();
+        hawkerImage = jdbcHelper.getImage();
+        hawkerLocation = jdbcHelper.getLocation();
+        hawkerName = jdbcHelper.getName();
+        hawkerStallAmount = jdbcHelper.getStall();
+        hawkerStatus = jdbcHelper.getStatus();
+        if (hawkerId==null) {
+            Toast.makeText(getContext(),"not connected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+    }
+
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
-    private void clear(){
-        title.setText("");
-        captions.setText("");
-        postImage.setImageResource(0);
-        location.setText("");
-    }
-
-    private void load(){
-        Cursor c = helper.getById(postID);
-        c.moveToFirst();
-
-        title.setText(helper.getTitle(c));
-        captions.setText(helper.getCaptions(c));
-
-        postImage.setImageBitmap(getImage(helper.getImage(c)));
-
-        double latitude = helper.getLatitude(c);
-        double longitude = helper.getLongitude(c);
-        String locationText = "Lat: " + latitude + " Long:" + longitude;
-        location.setText(locationText);
-    }
+//    private void clear(){
+//        title.setText("");
+//        captions.setText("");
+//        postImage.setImageResource(0);
+//        location.setText("");
+//    }
+//
+//    private void load(){
+//        Cursor c = helper.getById(postID);
+//        c.moveToFirst();
+//
+//        title.setText(helper.getTitle(c));
+//        captions.setText(helper.getCaptions(c));
+//
+//        postImage.setImageBitmap(getImage(helper.getImage(c)));
+//
+//        double latitude = helper.getLatitude(c);
+//        double longitude = helper.getLongitude(c);
+//        String locationText = "Lat: " + latitude + " Long:" + longitude;
+//        location.setText(locationText);
+//    }
 }
 
