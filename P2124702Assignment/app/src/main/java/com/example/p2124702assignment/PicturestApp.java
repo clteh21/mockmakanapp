@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.Gravity;
 import android.view.MenuItem;
 
@@ -23,6 +24,7 @@ public class PicturestApp extends AppCompatActivity implements NavigationView.On
 
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
+
 
     public void onRouteRequest(LatLng origin, LatLng destination) {
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.FragmentContainer);

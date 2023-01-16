@@ -2,6 +2,7 @@ package com.example.p2124702assignment;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.StrictMode;
 import android.util.Log;
 import com.mysql.cj.jdbc.Driver;
 import java.sql.Connection;
@@ -12,15 +13,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 public class JDBCHelper {
-    private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    private static final String DB_URL = "mysql://doadmin:AVNS_FgLcXa-Ox1C9aaG50kg@db-mysql-sgp-kiasu-hawker-do-user-12896483-0.b.db.ondigitalocean.com:25060/catalogue?ssl-mode=REQUIRED";
-    private static final String USER = "doadmin";
-    private static final String PASS = "AVNS_FgLcXa-Ox1C9aaG50kg";
+
+    private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/items";
+    private static final String USER = "root";
+    private static final String PASS = "Password@123";
 
     public static Connection getConnection() {
         try {
             Class.forName(JDBC_DRIVER);
-            return DriverManager.getConnection(DB_URL, USER, PASS);
+            return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/items","root","Password@123");
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
             return null;
@@ -33,7 +35,7 @@ public class JDBCHelper {
         if (connection != null) {
             try {
                 Statement statement = connection.createStatement();
-                String query = "SELECT * FROM catalogue.hawker";
+                String query = "SELECT * FROM items_table";
                 ResultSet resultSet = statement.executeQuery(query);
                 while (resultSet.next()) {
                     int id = resultSet.getInt("id");

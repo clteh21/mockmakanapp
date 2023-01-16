@@ -22,13 +22,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
 
     //Add RecyclerView member
     private RecyclerView recyclerView;
@@ -46,6 +47,8 @@ public class HomeFragment extends Fragment {
     private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
     private ArrayList<Integer> hawkerId, hawkerStallAmount;
     private JDBCHelper jdbcHelper = null;
+    private ArrayList<Data> dataList = null;
+    private RestAPI restAPI;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -86,18 +89,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        helper = new PictureHelper(getContext());
-//        getParentFragmentManager().setFragmentResultListener("ListToDetailKey",this,new FragmentResultListener(){
-//            @Override
-//            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-//                postID = result.getString("id");
-//                if(postID!=null){
-//                    load();
-//                } else{
-//                    clear();
-//                }
-//            }
-//        });
+        dataList = new ArrayList<>();
+        restAPI = new RestAPI();
 
     }
 
@@ -137,7 +130,6 @@ public class HomeFragment extends Fragment {
         hawkerRecycler.setAdapter(hawkerAdapter);
 
         displaydata();
-        displayHawker();
 
         return view;
     }
@@ -160,13 +152,35 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void displayHawker() {
-        hawkerId = jdbcHelper.getID();
-        hawkerImage = jdbcHelper.getImage();
-        hawkerLocation = jdbcHelper.getLocation();
-        hawkerName = jdbcHelper.getName();
-        hawkerStallAmount = jdbcHelper.getStall();
-        hawkerStatus = jdbcHelper.getStatus();
+    private void displayHawker(List<Data> data) {
+//        dataList = restAPI.getData();
+//        Thread thread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try  {
+//                    hawkerId = jdbcHelper.getID();
+//                    hawkerImage = jdbcHelper.getImage();
+//                    hawkerLocation = jdbcHelper.getLocation();
+//                    hawkerName = jdbcHelper.getName();
+//                    hawkerStallAmount = jdbcHelper.getStall();
+//                    hawkerStatus = jdbcHelper.getStatus();
+//                    // Your code goes here
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+
+        for(Data d: data ){
+            hawkerId.add(d.getId());
+            hawkerImage.add(d.getImage());
+            hawkerLocation.add(d.getLocation());
+            hawkerName.add(d.getName());
+            hawkerStallAmount.add(d.getStallAmount());
+            hawkerStatus.add(d.getStatus());
+        }
+
+//        thread.start();
         if (hawkerId==null) {
             Toast.makeText(getContext(),"not connected", Toast.LENGTH_SHORT).show();
             return;
@@ -176,6 +190,21 @@ public class HomeFragment extends Fragment {
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    @Override
+    public void onSuccess(List<Data> data) {
+        displayHawker(data);
+    }
+
+    @Override
+    public void onError(String message) {
+
+    }
+
+    @Override
+    public void onFailure(String message) {
+
     }
 
 //    private void clear(){
