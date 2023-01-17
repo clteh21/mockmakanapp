@@ -40,7 +40,6 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private PictureHelper helper = null;
     private PictureListAdapter adapter = null;
-    private String postID = null;
 
     private ArrayList<String> Title, Captions, Location;
     private ArrayList<Double> lat, lon;
@@ -49,10 +48,6 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView hawkerRecycler;
     private HawkerAdapter hawkerAdapter = null;
-    private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
-    private ArrayList<Integer> hawkerId, hawkerStallAmount;
-    private JDBCHelper jdbcHelper = null;
-    private RestAPI restAPI;
     private List<Data> dataArrayList = null;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -117,42 +112,21 @@ public class HomeFragment extends Fragment {
         id = new ArrayList<>();
         lat = new ArrayList<>();
         lon = new ArrayList<>();
+
         adapter = new PictureListAdapter(getContext(),Title,Captions,Location,images, id, lat, lon);
         recyclerView.setAdapter(adapter);
 
-        restAPI = new RestAPI();
-
         hawkerRecycler = view.findViewById(R.id.recyclerHawker);
-//        jdbcHelper = new JDBCHelper();
-        hawkerId = new ArrayList<>();
-        hawkerImage = new ArrayList<>();
-        hawkerLocation = new ArrayList<>();
-        hawkerName = new ArrayList<>();
-        hawkerStallAmount = new ArrayList<>();
-        hawkerStatus = new ArrayList<>();
-        hawkerRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        hawkerRecycler.setHasFixedSize(true);
+        hawkerRecycler.setLayoutManager(new LinearLayoutManager(view.getContext()));
+
+        dataArrayList = new ArrayList<>();
+
         hawkerAdapter = new HawkerAdapter(getContext(), dataArrayList);
         hawkerRecycler.setAdapter(hawkerAdapter);
 
         displaydata();
-//        restAPI.getData(new RestAPI.RestAPIListener() {
-//            @Override
-//            public void onSuccess(List<Data> data) {
-//                // pass the data to the displayHawker function
-//                displayHawker(data);
-//                hawkerAdapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onError(String message) {
-//                // handle the error
-//            }
-//
-//            @Override
-//            public void onFailure(String message) {
-//                // handle the failure
-//            }
-//        });
+
         interfaceAPI apiService = RestAPI.getClient().create(interfaceAPI.class);
         Call<Data> call = apiService.getData();
 
@@ -161,20 +135,22 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<Data> call, Response<Data> response) {
                 Data data = response.body();
                 dataArrayList = data.getData();
-                Log.d("TAG","Response name = "+dataArrayList.get(0).getName());
-                Log.d("TAG","Response id = "+dataArrayList.get(0).getId());
+//                Log.d("TAG","Response name = "+dataArrayList.get(0).getName());
+//                Log.d("TAG","Response id = "+dataArrayList.get(0).getId());
+//                Log.d("TAG","Response id = "+dataArrayList.get(0).getImage());
                 hawkerAdapter.setDataList(dataArrayList);
             }
 
             @Override
             public void onFailure(Call<Data> call, Throwable t) {
-                Log.d("TAG","Response = "+t.toString());
+                Log.d("TAG","Response Failure = "+t.toString());
             }
         });
 
         return view;
     }
 
+    //display SQLite data
     private void displaydata() {
         Cursor cursor = helper.getAll();
         if(cursor.getCount()==0){
@@ -193,46 +169,10 @@ public class HomeFragment extends Fragment {
         }
     }
 
-//    private void displayHawker(List<Data> data) {
-//        for(Data d: data ){
-//            hawkerId.add(d.getId());
-//            hawkerImage.add(d.getImage());
-//            hawkerLocation.add(d.getLocation());
-//            hawkerName.add(d.getName());
-//            hawkerStallAmount.add(d.getStallAmount());
-//            hawkerStatus.add(d.getStatus());
-//        }
-//        if (hawkerId==null) {
-//            Toast.makeText(getContext(),"not connected", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//    }
-
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
-//    private void clear(){
-//        title.setText("");
-//        captions.setText("");
-//        postImage.setImageResource(0);
-//        location.setText("");
-//    }
-//
-//    private void load(){
-//        Cursor c = helper.getById(postID);
-//        c.moveToFirst();
-//
-//        title.setText(helper.getTitle(c));
-//        captions.setText(helper.getCaptions(c));
-//
-//        postImage.setImageBitmap(getImage(helper.getImage(c)));
-//
-//        double latitude = helper.getLatitude(c);
-//        double longitude = helper.getLongitude(c);
-//        String locationText = "Lat: " + latitude + " Long:" + longitude;
-//        location.setText(locationText);
-//    }
 }
 

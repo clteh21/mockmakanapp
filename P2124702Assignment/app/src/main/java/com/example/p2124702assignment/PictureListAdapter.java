@@ -29,8 +29,6 @@ import java.util.Random;
 
 public class PictureListAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
-    private PictureHelper helper;
-    private Cursor cursor;
     private Context context;
     private ArrayList<String> Title, Captions, Location;
     private ArrayList<Double> lat, lon;

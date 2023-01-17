@@ -1,5 +1,6 @@
 package com.example.p2124702assignment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +15,16 @@ import java.util.List;
 
 public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
-    private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
-    private ArrayList<Integer> hawkerId, hawkerStallAmount;
     private List<Data> dataList = null;
     private Context ct;
     View hawkerView;
-
-//    ArrayList<Integer> id, ArrayList<String> name, ArrayList<Integer> amt, ArrayList<String> location, ArrayList<String> status, ArrayList<String> image
 
     public HawkerAdapter (Context ct, List<Data> data) {
         this.ct = ct;
         dataList = data;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setDataList(List<Data> dataList) {
         this.dataList = dataList;
         notifyDataSetChanged();
@@ -34,7 +32,7 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return R.id.cardHawker;
+        return R.layout.hawker_cardview;
     }
 
     @NonNull
@@ -42,8 +40,7 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
     public HawkerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(ct);
         hawkerView = inflater.inflate(R.layout.hawker_cardview, null);
-        HawkerViewHolder hawkerHolder = new HawkerViewHolder(hawkerView);
-        return hawkerHolder;
+        return new HawkerViewHolder(hawkerView);
     }
 
     @Override
@@ -59,6 +56,9 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
     @Override
     public int getItemCount() {
+        if(dataList!=null){
+            return dataList.size();
+        }
         return 0;
     }
 }

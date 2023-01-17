@@ -18,7 +18,6 @@ public class HawkerViewHolder extends RecyclerView.ViewHolder {
 
     public HawkerViewHolder(@NonNull View itemView) {
         super(itemView);
-
         hawkerImage = itemView.findViewById(R.id.hawkerImageView);
         hawkerDist_Price = itemView.findViewById(R.id.hawkerDist_Price);
         hawkerName = itemView.findViewById(R.id.hawkerName);

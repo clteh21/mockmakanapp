@@ -21,7 +21,6 @@ public class RecyclerViewHolder extends RecyclerView.ViewHolder {
             postImage = itemView.findViewById(R.id.postImageView);
             postLocation = itemView.findViewById(R.id.postLocation);
             postCaption = itemView.findViewById(R.id.postCaption);
-
     }
 
     public FrameLayout getView(){
