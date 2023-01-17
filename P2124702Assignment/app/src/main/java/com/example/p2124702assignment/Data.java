@@ -20,6 +20,17 @@ public class Data {
     @SerializedName("crowd_status")
     private String crowdStatus;
 
+    private List<Data> data;
+
+    public List<Data> getData() {
+        return data;
+    }
+
+    public void setData(List<Data> data) {
+        this.data = data;
+
+    }
+
     public Data(int id, String name, int stallAmount, String location, String status, String image, String crowdStatus) {
         this.id = id;
         this.name = name;

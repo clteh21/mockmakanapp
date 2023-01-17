@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +25,16 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
+public class HomeFragment extends Fragment {
 
     //Add RecyclerView member
     private RecyclerView recyclerView;
@@ -47,8 +52,8 @@ public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
     private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
     private ArrayList<Integer> hawkerId, hawkerStallAmount;
     private JDBCHelper jdbcHelper = null;
-    private ArrayList<Data> dataList = null;
     private RestAPI restAPI;
+    private List<Data> dataArrayList = null;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -89,8 +94,6 @@ public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dataList = new ArrayList<>();
-        restAPI = new RestAPI();
 
     }
 
@@ -117,19 +120,57 @@ public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
         adapter = new PictureListAdapter(getContext(),Title,Captions,Location,images, id, lat, lon);
         recyclerView.setAdapter(adapter);
 
+        restAPI = new RestAPI();
+
         hawkerRecycler = view.findViewById(R.id.recyclerHawker);
-        jdbcHelper = new JDBCHelper();
+//        jdbcHelper = new JDBCHelper();
         hawkerId = new ArrayList<>();
         hawkerImage = new ArrayList<>();
         hawkerLocation = new ArrayList<>();
         hawkerName = new ArrayList<>();
         hawkerStallAmount = new ArrayList<>();
         hawkerStatus = new ArrayList<>();
-        hawkerAdapter = new HawkerAdapter(getContext(), hawkerId, hawkerName, hawkerStallAmount, hawkerLocation, hawkerStatus, hawkerImage);
         hawkerRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        hawkerAdapter = new HawkerAdapter(getContext(), dataArrayList);
         hawkerRecycler.setAdapter(hawkerAdapter);
 
         displaydata();
+//        restAPI.getData(new RestAPI.RestAPIListener() {
+//            @Override
+//            public void onSuccess(List<Data> data) {
+//                // pass the data to the displayHawker function
+//                displayHawker(data);
+//                hawkerAdapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onError(String message) {
+//                // handle the error
+//            }
+//
+//            @Override
+//            public void onFailure(String message) {
+//                // handle the failure
+//            }
+//        });
+        interfaceAPI apiService = RestAPI.getClient().create(interfaceAPI.class);
+        Call<Data> call = apiService.getData();
+
+        call.enqueue(new Callback<Data>() {
+            @Override
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                Data data = response.body();
+                dataArrayList = data.getData();
+                Log.d("TAG","Response name = "+dataArrayList.get(0).getName());
+                Log.d("TAG","Response id = "+dataArrayList.get(0).getId());
+                hawkerAdapter.setDataList(dataArrayList);
+            }
+
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.d("TAG","Response = "+t.toString());
+            }
+        });
 
         return view;
     }
@@ -152,59 +193,24 @@ public class HomeFragment extends Fragment implements RestAPI.RestAPIListener{
         }
     }
 
-    private void displayHawker(List<Data> data) {
-//        dataList = restAPI.getData();
-//        Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try  {
-//                    hawkerId = jdbcHelper.getID();
-//                    hawkerImage = jdbcHelper.getImage();
-//                    hawkerLocation = jdbcHelper.getLocation();
-//                    hawkerName = jdbcHelper.getName();
-//                    hawkerStallAmount = jdbcHelper.getStall();
-//                    hawkerStatus = jdbcHelper.getStatus();
-//                    // Your code goes here
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-
-        for(Data d: data ){
-            hawkerId.add(d.getId());
-            hawkerImage.add(d.getImage());
-            hawkerLocation.add(d.getLocation());
-            hawkerName.add(d.getName());
-            hawkerStallAmount.add(d.getStallAmount());
-            hawkerStatus.add(d.getStatus());
-        }
-
-//        thread.start();
-        if (hawkerId==null) {
-            Toast.makeText(getContext(),"not connected", Toast.LENGTH_SHORT).show();
-            return;
-        }
-    }
+//    private void displayHawker(List<Data> data) {
+//        for(Data d: data ){
+//            hawkerId.add(d.getId());
+//            hawkerImage.add(d.getImage());
+//            hawkerLocation.add(d.getLocation());
+//            hawkerName.add(d.getName());
+//            hawkerStallAmount.add(d.getStallAmount());
+//            hawkerStatus.add(d.getStatus());
+//        }
+//        if (hawkerId==null) {
+//            Toast.makeText(getContext(),"not connected", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//    }
 
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
-    }
-
-    @Override
-    public void onSuccess(List<Data> data) {
-        displayHawker(data);
-    }
-
-    @Override
-    public void onError(String message) {
-
-    }
-
-    @Override
-    public void onFailure(String message) {
-
     }
 
 //    private void clear(){

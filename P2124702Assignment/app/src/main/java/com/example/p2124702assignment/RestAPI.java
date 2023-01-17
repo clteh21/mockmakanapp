@@ -15,53 +15,61 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 
 public class RestAPI {
-    private Retrofit retrofit;
-    private String baseUrl = "http://localhost:8002/api/";
+    private static Retrofit retrofit;
+    private static String baseUrl = "http://10.0.2.2:8002/api/";
 
-    public RestAPI() {
+    public static Retrofit getClient(){
+        if(retrofit == null){
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return retrofit;
+    }
 //        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 //        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 //        OkHttpClient client = new OkHttpClient.Builder()
 //                .addInterceptor(logging)
 //                .build();
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-//                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-    }
+//        retrofit = new Retrofit.Builder()
+//                .baseUrl(baseUrl)
+////                .client(client)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
 
-    public void getData(final RestAPIListener listener) {
-        Api api = retrofit.create(Api.class);
-        Call<List<Data>> call = api.getData();
-        call.enqueue(new Callback<List<Data>>() {
-            @Override
-            public void onResponse(Call<List<Data>> call, Response<List<Data>> response) {
-                if (response.isSuccessful()) {
-                    listener.onSuccess(response.body());
-                } else {
-                    listener.onError(response.message());
-                }
-            }
 
-            @Override
-            public void onFailure(Call<List<Data>> call, Throwable t) {
-                listener.onFailure(t.getMessage());
-            }
-        });
-    }
+//    public void getData(final RestAPIListener listener) {
+//        Api api = retrofit.create(Api.class);
+//        Call<List<Data>> call = api.getData();
+//        call.enqueue(new Callback<List<Data>>() {
+//            @Override
+//            public void onResponse(Call<List<Data>> call, Response<List<Data>> response) {
+//                if (response.isSuccessful()) {
+//                    listener.onSuccess(response.body());
+//                } else {
+//                    listener.onError(response.message());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<Data>> call, Throwable t) {
+//                listener.onFailure(t.getMessage());
+//            }
+//        });
+//    }
 
-    public interface Api {
-        @GET("hawker/data/all")
-        Call<List<Data>> getData();
-    }
-
-    public interface RestAPIListener {
-        void onSuccess(List<Data> data);
-
-        void onError(String message);
-
-        void onFailure(String message);
-    }
+//    public interface Api {
+//        @GET("hawker/data/all")
+//        Call<List<Data>> getData();
+//    }
+//
+//    public interface RestAPIListener {
+//        void onSuccess(List<Data> data);
+//
+//        void onError(String message);
+//
+//        void onFailure(String message);
+//    }
 }

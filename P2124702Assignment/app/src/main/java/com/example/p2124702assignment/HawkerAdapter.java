@@ -4,27 +4,32 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
+import java.util.List;
 
 public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
     private ArrayList<String> hawkerName, hawkerLocation, hawkerStatus, hawkerImage;
     private ArrayList<Integer> hawkerId, hawkerStallAmount;
+    private List<Data> dataList = null;
     private Context ct;
     View hawkerView;
 
-    public HawkerAdapter (Context ct, ArrayList<Integer> id, ArrayList<String> name, ArrayList<Integer> amt, ArrayList<String> location, ArrayList<String> status, ArrayList<String> image) {
+//    ArrayList<Integer> id, ArrayList<String> name, ArrayList<Integer> amt, ArrayList<String> location, ArrayList<String> status, ArrayList<String> image
+
+    public HawkerAdapter (Context ct, List<Data> data) {
         this.ct = ct;
-        hawkerId = id;
-        hawkerName = name;
-        hawkerStallAmount = amt;
-        hawkerLocation = location;
-        hawkerStatus = status;
-        hawkerImage = image;
+        dataList = data;
+    }
+
+    public void setDataList(List<Data> dataList) {
+        this.dataList = dataList;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -43,16 +48,17 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull HawkerViewHolder holder, int position) {
-        String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/hawker/" + hawkerImage.get(position);
+        String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/hawker/" + dataList.get(position).getImage();
         Picasso.get().load(imageUrl).into(holder.hawkerImage);
-        holder.hawkerName.setText(hawkerName.get(position));
+        Toast.makeText(hawkerView.getContext(), dataList.get(position).getName(),Toast.LENGTH_SHORT).show();
+        holder.hawkerName.setText(dataList.get(position).getName());
         holder.hawkerDist_Price.setText("idk yet");
-        holder.hawkerStatus.setText(hawkerStatus.get(position));
-        holder.hawkerLocation.setText(hawkerLocation.get(position));
+        holder.hawkerStatus.setText(dataList.get(position).getStatus());
+        holder.hawkerLocation.setText(dataList.get(position).getLocation());
     }
 
     @Override
     public int getItemCount() {
-        return hawkerId.size();
+        return 0;
     }
 }
