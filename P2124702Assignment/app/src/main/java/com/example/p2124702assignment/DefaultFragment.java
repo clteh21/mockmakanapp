@@ -1,5 +1,6 @@
 package com.example.p2124702assignment;
 
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,7 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +31,8 @@ public class DefaultFragment extends Fragment {
     private HomeFragment homeFragment;
     private AddFragment addFragment;
     private MapFragment mapFragment;
+
+    private double lat, lon;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -65,9 +69,14 @@ public class DefaultFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            lat = getArguments().getDouble("latitude");
+            lon = getArguments().getDouble("longitude");
         }
+    }
+
+    public void setCurrentLocation(Location location) {
+        lat = location.getLatitude();
+        lon = location.getLongitude();
     }
 
     @Override
@@ -77,6 +86,12 @@ public class DefaultFragment extends Fragment {
         homeFragment = new HomeFragment();
         addFragment = new AddFragment();
         mapFragment = new MapFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putDouble("latitude",lat);
+        bundle.putDouble("longitude",lon);
+        homeFragment.setArguments(bundle);
+        Log.d("tag:", "passed from activity :"+lat + lon);
 
         navView = getView().findViewById(R.id.bottomNavigationView);
         navView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {

@@ -1,6 +1,9 @@
 package com.example.p2124702assignment;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -9,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,21 +22,36 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 
 public class PicturestApp extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        BottomScrollMap.OnRouteRequestListener, LocationListener {
+        BottomScrollMap.OnRouteRequestListener{
 
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
-    protected LocationManager locationManager;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLocation;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+
+    private FusedLocationProviderClient mFusedLocationClient;
+    double lat, lon;
 
 
     public void onRouteRequest(LatLng origin, LatLng destination) {
@@ -54,28 +73,38 @@ public class PicturestApp extends AppCompatActivity implements NavigationView.On
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            return;
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(20 * 1000);locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        lat = location.getLatitude();
+                        lon = location.getLongitude();            }
+                }
+            }
+        };
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(locationCallback);
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, (float) 0, (android.location.LocationListener) this);
+        Bundle bundle = new Bundle();
+        bundle.putDouble("latitude",lat);
+        bundle.putDouble("longitude",lon);
+        Log.d("Tag:","value of activity " + lat +lon);
+        DefaultFragment defaultFragment = new DefaultFragment();
+        defaultFragment.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().replace(R.id.defaultFragmentContainerView,
+                new DefaultFragment()).commit();
 
-
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.defaultFragmentContainerView,
-                    new DefaultFragment()).commit();
-            Bundle bundle = new Bundle();
-            bundle.; //any string to be sent
-            fragment.setArguments(bundle);
-            navigationView.setCheckedItem(R.id.navHomeButton);
-        }
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
+}
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -110,24 +139,5 @@ public class PicturestApp extends AppCompatActivity implements NavigationView.On
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
-    @Override
-    protected void onStart() {
-        invalidateOptionsMenu();
-        super.onStart();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        if(actionBarDrawerToggle.onOptionsItemSelected(item)){
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-
-    }
 }
+

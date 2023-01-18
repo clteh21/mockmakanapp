@@ -56,7 +56,8 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
         Picasso.get().load(imageUrl).into(holder.hawkerImage);
         Toast.makeText(hawkerView.getContext(), dataList.get(position).getName(),Toast.LENGTH_SHORT).show();
         holder.hawkerName.setText(dataList.get(position).getName());
-        holder.hawkerDist_Price.setText("idk yet");
+        double distance = dataList.get(position).getDistance();
+        holder.hawkerDist_Price.setText(String.valueOf(distance/1000));
         holder.hawkerStatus.setText(dataList.get(position).getStatus());
         holder.hawkerLocation.setText(dataList.get(position).getLocation());
     }

@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -50,7 +51,7 @@ import retrofit2.Response;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment{
+public class HomeFragment extends Fragment implements LocationListener{
 
     //Add RecyclerView member
     private RecyclerView recyclerView;
@@ -66,42 +67,47 @@ public class HomeFragment extends Fragment{
     private HawkerAdapter hawkerAdapter = null;
     private List<Data> dataArrayList = null;
 
-    private FusedLocationProviderClient fusedLocationClient;
+    private double lati, longi;
 
-    public LatLng getLocationFromAddress(Context context, String strAddress) {
 
-        Geocoder coder = new Geocoder(context);
-        List<Address> address;
+    public LatLng getLocationFromAddress(String strAddress, Context context) {
         LatLng p1 = null;
+        if(getActivity() != null){
 
-        try {
-            // May throw an IOException
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
+            Geocoder coder = new Geocoder(context);
+            List<Address> address;
+
+            try {
+                // May throw an IOException
+                address = coder.getFromLocationName(strAddress, 5);
+                if (address == null) {
+                    return null;
+                }
+                Address location = address.get(0);
+                p1 = new LatLng(location.getLatitude(), location.getLongitude());
+
+            } catch (IOException ex) {
+
+                ex.printStackTrace();
             }
-
-            Address location = address.get(0);
-            p1 = new LatLng(location.getLatitude(), location.getLongitude());
-
-        } catch (IOException ex) {
-
-            ex.printStackTrace();
         }
-
         return p1;
     }
 
-    public float calculateDistance(Location location, String destination) {
+    public float calculateDistance(Location location, String destination, Context context) {
+        float distance=0;
         //calculates and finds distance between 2 points
         Location a = new Location("point A");
         a.setLatitude(location.getLatitude());
         a.setLongitude(location.getLongitude());
         Location b = new Location("point B");
-        LatLng dest = getLocationFromAddress(getContext(), destination);
-        b.setLatitude(dest.latitude);
-        b.setLongitude(dest.longitude);
-        float distance = a.distanceTo(b);
+        LatLng dest = getLocationFromAddress(destination,context);
+        if(dest!=null){
+            b.setLatitude(dest.latitude);
+            b.setLongitude(dest.longitude);
+            distance = a.distanceTo(b);
+        }
+        Log.d("Tag:","Name:"+destination+"\n Distance: "+distance);
         return distance;
     }
 
@@ -144,6 +150,10 @@ public class HomeFragment extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            lati = getArguments().getDouble("latitude");
+            longi = getArguments().getDouble("longitude");
+        }
     }
 
     @Override
@@ -190,8 +200,14 @@ public class HomeFragment extends Fragment{
             public void onResponse(Call<Data> call, Response<Data> response) {
                 Data data = response.body();
                 dataArrayList = data.getData();
+
+                Location location = new Location("myself");
+                location.setLatitude(lati);
+                location.setLongitude(longi);
+                Log.d("location","latlng is "+location);
+
                 for(int i =0; i<dataArrayList.size(); i++){
-                    float f = calculateDistance(lastLoc[0],dataArrayList.get(i).getLocation());
+                    float f = calculateDistance(location,dataArrayList.get(i).getLocation(),getActivity());
                     dataArrayList.get(i).setDistance(f);
                 }
                 Collections.sort(dataArrayList, new Comparator() {
@@ -241,5 +257,9 @@ public class HomeFragment extends Fragment{
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
+    @Override
+    public void onLocationChanged(@NonNull android.location.Location location) {
+
+    }
 }
 
