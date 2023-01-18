@@ -1,13 +1,20 @@
 package com.example.p2124702assignment;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -22,7 +29,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,7 +50,7 @@ import retrofit2.Response;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment{
 
     //Add RecyclerView member
     private RecyclerView recyclerView;
@@ -49,6 +65,45 @@ public class HomeFragment extends Fragment {
     private RecyclerView hawkerRecycler;
     private HawkerAdapter hawkerAdapter = null;
     private List<Data> dataArrayList = null;
+
+    private FusedLocationProviderClient fusedLocationClient;
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+
+            Address location = address.get(0);
+            p1 = new LatLng(location.getLatitude(), location.getLongitude());
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
+    }
+
+    public float calculateDistance(Location location, String destination) {
+        //calculates and finds distance between 2 points
+        Location a = new Location("point A");
+        a.setLatitude(location.getLatitude());
+        a.setLongitude(location.getLongitude());
+        Location b = new Location("point B");
+        LatLng dest = getLocationFromAddress(getContext(), destination);
+        b.setLatitude(dest.latitude);
+        b.setLongitude(dest.longitude);
+        float distance = a.distanceTo(b);
+        return distance;
+    }
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -89,12 +144,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         setHasOptionsMenu(true);
@@ -135,6 +190,18 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<Data> call, Response<Data> response) {
                 Data data = response.body();
                 dataArrayList = data.getData();
+                for(int i =0; i<dataArrayList.size(); i++){
+                    float f = calculateDistance(lastLoc[0],dataArrayList.get(i).getLocation());
+                    dataArrayList.get(i).setDistance(f);
+                }
+                Collections.sort(dataArrayList, new Comparator() {
+                    @Override
+                    public int compare(Object o, Object t1) {
+                        Data a = (Data) o;
+                        Data b= (Data) t1;
+                        return Float.compare(a.getDistance(), b.getDistance());
+                    }
+                });
 //                Log.d("TAG","Response name = "+dataArrayList.get(0).getName());
 //                Log.d("TAG","Response id = "+dataArrayList.get(0).getId());
 //                Log.d("TAG","Response id = "+dataArrayList.get(0).getImage());

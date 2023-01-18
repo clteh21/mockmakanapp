@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
@@ -45,6 +46,12 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull HawkerViewHolder holder, int position) {
+        hawkerView.findViewById(R.id.cardHawker).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/hawker/" + dataList.get(position).getImage();
         Picasso.get().load(imageUrl).into(holder.hawkerImage);
         Toast.makeText(hawkerView.getContext(), dataList.get(position).getName(),Toast.LENGTH_SHORT).show();

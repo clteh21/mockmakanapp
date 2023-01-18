@@ -20,6 +20,8 @@ public class Data {
     @SerializedName("crowd_status")
     private String crowdStatus;
 
+    private float distance=0;
+
     private List<Data> data;
 
     public List<Data> getData() {
@@ -28,10 +30,9 @@ public class Data {
 
     public void setData(List<Data> data) {
         this.data = data;
-
     }
 
-    public Data(int id, String name, int stallAmount, String location, String status, String image, String crowdStatus) {
+    public Data(int id, String name, int stallAmount, String location, String status, String image, String crowdStatus, float distance) {
         this.id = id;
         this.name = name;
         this.stallAmount = stallAmount;
@@ -39,6 +40,7 @@ public class Data {
         this.status = status;
         this.image = image;
         this.crowdStatus = crowdStatus;
+        this.distance = distance;
     }
 
     public int getId() {
@@ -68,5 +70,9 @@ public class Data {
     public String getCrowdStatus() {
         return crowdStatus;
     }
+
+    public float getDistance() {return distance;}
+
+    public void setDistance(float dist) { this.distance = dist; }
 }
 

@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 
 import android.content.res.Resources;
@@ -58,6 +60,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -285,6 +288,43 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
             }
         });
 
+    }
+
+    public LatLng getLocationFromAddress(Context context,String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+
+            Address location = address.get(0);
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
+    }
+
+    public float calculateDistance(String destination){
+        //calculates and finds distance between 2 points
+        Location a = new Location("point A");
+        a.setLatitude(mLastLocation.getLatitude());
+        a.setLongitude(mLastLocation.getLongitude());
+        Location b = new Location("point B");
+        LatLng dest = getLocationFromAddress(getContext(),destination);
+        b.setLatitude(dest.latitude);
+        b.setLongitude(dest.longitude);
+        float distance = a.distanceTo(b);
+        return distance;
     }
 
     // function to find Routes.

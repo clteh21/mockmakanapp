@@ -14,7 +14,7 @@ public class HawkerViewHolder extends RecyclerView.ViewHolder {
     TextView hawkerName, hawkerLocation, hawkerDist_Price, hawkerStatus;
     ImageView hawkerImage;
 
-    private CardView view;
+    private CardView cardView;
 
     public HawkerViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -23,7 +23,8 @@ public class HawkerViewHolder extends RecyclerView.ViewHolder {
         hawkerName = itemView.findViewById(R.id.hawkerName);
         hawkerLocation = itemView.findViewById(R.id.hawkerLoc);
         hawkerStatus = itemView.findViewById(R.id.hawkerStatus);
+        cardView = itemView.findViewById(R.id.cardHawker);
     }
 
-    public FrameLayout getView() {return view;}
+    public FrameLayout getView() {return cardView;}
 }
