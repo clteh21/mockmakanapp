@@ -117,8 +117,8 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         hawkerRecycler = view.findViewById(R.id.recyclerHawker);
-        hawkerRecycler.setHasFixedSize(true);
-        hawkerRecycler.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        hawkerRecycler.setHasFixedSize(false);
+        hawkerRecycler.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
         dataArrayList = new ArrayList<>();
 
