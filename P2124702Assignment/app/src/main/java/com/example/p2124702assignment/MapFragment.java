@@ -62,7 +62,14 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -84,6 +91,8 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     protected LatLng start=null;
     protected LatLng end=null;
+
+    private List<Data> dataList;
 
     //polyline object
     private List<Polyline> polylines=null;
@@ -133,12 +142,42 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         //Add hawker centres marker
-        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3134, 103.7646))
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker))
-                        .title("Clementi Hawker Centre"));
-        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3347, 103.7215))
-                .title("Taman Jurong Hawker Centre")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker)));
+//        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3134, 103.7646))
+//                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker))
+//                        .title("Clementi Hawker Centre"));
+//        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.3347, 103.7215))
+//                .title("Taman Jurong Hawker Centre")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker)));
+        interfaceAPI apiService = RestAPI.getClient().create(interfaceAPI.class);
+        Call<Data> call = apiService.getData();
+
+        call.enqueue(new Callback<Data>() {
+            @Override
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                Data data = response.body();
+                dataList = data.getData();
+
+                if(GPSUtils.getInstance().getLatitude()!=null){
+                    for(int i=0;i<dataList.size();i++){
+                        if(Objects.equals(dataList.get(i).getName(), "Margaret Drive Hawker Centre")){
+                            mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(1.2977, 103.8043))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker))
+                                    .title(dataList.get(i).getName()));
+                        } else {
+                            mGoogleMap.addMarker(new MarkerOptions().position(getLocationFromAddress(getActivity(),dataList.get(i).getLocation()))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_restaurant_marker))
+                                    .title(dataList.get(i).getName()));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.d("TAG","Response Failure = "+t.toString());
+            }
+        });
+
 
 
         //Initialize Google Play Services
@@ -185,6 +224,10 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
 
     @Override
     public void onConnectionSuspended(int i) {}
+
+    public void setList(List<Data> list){
+        dataList = list;
+    }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {}
@@ -494,5 +537,27 @@ public class MapFragment extends SupportMapFragment implements OnMapReadyCallbac
     @Override
     public void onRoutingCancelled() {
         Findroutes(start,end);
+    }
+
+    public LatLng getLocationFromAddress(String strAddress, Context context) {
+        LatLng p1 = null;
+        if(getActivity() != null){
+
+            Geocoder coder = new Geocoder(context);
+            List<Address> address;
+
+            try {
+                // May throw an IOException
+                address = coder.getFromLocationName(strAddress, 5);
+                if (address == null) {
+                    return null;
+                }
+                Address location = address.get(0);
+                p1 = new LatLng(location.getLatitude(), location.getLongitude());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return p1;
     }
 }

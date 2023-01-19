@@ -67,6 +67,8 @@ public class HomeFragment extends Fragment implements LocationListener{
     private HawkerAdapter hawkerAdapter = null;
     private List<Data> dataArrayList = null;
 
+    MapFragment mapFragment;
+
     private double lati, longi;
 
 
@@ -96,12 +98,17 @@ public class HomeFragment extends Fragment implements LocationListener{
 
     public float calculateDistance(Location location, String destination, Context context) {
         float distance=0;
+        LatLng dest = null;
         //calculates and finds distance between 2 points
         Location a = new Location("point A");
         a.setLatitude(location.getLatitude());
         a.setLongitude(location.getLongitude());
         Location b = new Location("point B");
-        LatLng dest = getLocationFromAddress(destination,context);
+        if(destination.equals("38A, Margaret Dr, Singapore 142038")){
+            dest = new LatLng(1.2977, 103.8043);
+        } else {
+            dest = getLocationFromAddress(destination,context);
+        }
         if(dest!=null){
             b.setLatitude(dest.latitude);
             b.setLongitude(dest.longitude);
@@ -192,6 +199,8 @@ public class HomeFragment extends Fragment implements LocationListener{
 
         displaydata();
 
+        GPSUtils.getInstance().findDeviceLocation(getActivity());
+
         interfaceAPI apiService = RestAPI.getClient().create(interfaceAPI.class);
         Call<Data> call = apiService.getData();
 
@@ -201,26 +210,29 @@ public class HomeFragment extends Fragment implements LocationListener{
                 Data data = response.body();
                 dataArrayList = data.getData();
 
-                Location location = new Location("myself");
-                location.setLatitude(lati);
-                location.setLongitude(longi);
-                Log.d("location","latlng is "+location);
+                if(GPSUtils.getInstance().getLatitude()!=null){
+                    Location location = new Location("myself");
+                    location.setLatitude(Double.parseDouble(GPSUtils.getInstance().getLatitude()));
+                    location.setLongitude(Double.parseDouble(GPSUtils.getInstance().getLongitude()));
 
-                for(int i =0; i<dataArrayList.size(); i++){
-                    float f = calculateDistance(location,dataArrayList.get(i).getLocation(),getActivity());
-                    dataArrayList.get(i).setDistance(f);
-                }
-                Collections.sort(dataArrayList, new Comparator() {
-                    @Override
-                    public int compare(Object o, Object t1) {
-                        Data a = (Data) o;
-                        Data b= (Data) t1;
-                        return Float.compare(a.getDistance(), b.getDistance());
+                    //                Log.d("location","latlng is "+location);
+
+                    for(int i =0; i<dataArrayList.size(); i++){
+                        float f = calculateDistance(location,dataArrayList.get(i).getLocation(),getActivity());
+                        dataArrayList.get(i).setDistance(f);
                     }
-                });
+                    Collections.sort(dataArrayList, new Comparator() {
+                        @Override
+                        public int compare(Object o, Object t1) {
+                            Data a = (Data) o;
+                            Data b= (Data) t1;
+                            return Float.compare(a.getDistance(), b.getDistance());
+                        }
+                    });
 //                Log.d("TAG","Response name = "+dataArrayList.get(0).getName());
 //                Log.d("TAG","Response id = "+dataArrayList.get(0).getId());
 //                Log.d("TAG","Response id = "+dataArrayList.get(0).getImage());
+                }
                 hawkerAdapter.setDataList(dataArrayList);
             }
 
@@ -259,7 +271,8 @@ public class HomeFragment extends Fragment implements LocationListener{
 
     @Override
     public void onLocationChanged(@NonNull android.location.Location location) {
-
+        lati = location.getLatitude();
+        longi = location.getLongitude();
     }
 }
 

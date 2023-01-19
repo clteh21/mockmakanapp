@@ -2,12 +2,14 @@ package com.example.p2124702assignment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
@@ -45,11 +47,18 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull HawkerViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull HawkerViewHolder holder, @SuppressLint("RecyclerView") int position) {
         hawkerView.findViewById(R.id.cardHawker).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                String name = dataList.get(position).getName();
+                Bundle bundle = new Bundle();
+                AddFragment addFragment = new AddFragment();
+                bundle.putString("name",name);
+                addFragment.setArguments(bundle);
+                ((FragmentActivity) hawkerView.getContext()).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.FragmentContainer, addFragment)
+                        .commit();
             }
         });
         String imageUrl = "https://kiasu-hawker.sgp1.digitaloceanspaces.com/hawker/" + dataList.get(position).getImage();
@@ -65,8 +74,9 @@ public class HawkerAdapter extends RecyclerView.Adapter<HawkerViewHolder> {
     @Override
     public int getItemCount() {
         if(dataList!=null){
-            return dataList.size();
+            return Math.min(dataList.size(), 4);
         }
         return 0;
+
     }
 }

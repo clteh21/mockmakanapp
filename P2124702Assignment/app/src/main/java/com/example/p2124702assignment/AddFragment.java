@@ -66,6 +66,7 @@ public class AddFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String nameFromHome;
 
     public AddFragment() {
         // Required empty public constructor
@@ -85,6 +86,9 @@ public class AddFragment extends Fragment {
     @Override
     public void setArguments(@Nullable Bundle args) {
         super.setArguments(args);
+        if(getArguments()!=null){
+            nameFromHome = getArguments().getString("name");
+        }
     }
 
     @Override
@@ -115,6 +119,7 @@ public class AddFragment extends Fragment {
 
         location = view.findViewById(R.id.textViewLocation);
         title = view.findViewById(R.id.editTextTitle);
+        title.setText(nameFromHome);
         caption = view.findViewById(R.id.editTextCaption);
 
         location.setOnClickListener(new View.OnClickListener() {
